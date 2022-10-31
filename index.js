@@ -29,7 +29,7 @@ client.connect(err => {
     const opinionCollection = client.db(`${process.env.DB_FILE}`).collection("allOpinion");
     const appointmentCollection = client.db(`${process.env.DB_FILE}`).collection("allAppointment");
     const universityCollection = client.db(`${process.env.DB_FILE}`).collection("allUniversity");
-    
+    const universityDetailsCollection = client.db(`${process.env.DB_FILE}`).collection("allUniversityDetails");
     //for order
     app.post('/addOrder', (req, res) => {
         const order = req.body;
@@ -150,6 +150,45 @@ client.connect(err => {
     })
     app.patch('/updateUniversity/:id', (req, res) => {
         universityCollection.updateOne({ _id: ObjectId(req.params.id) },
+            {
+                $set: {
+                    data: req.body
+                },
+            })
+            .then(result => {
+                res.send(result.matchedCount > 0);
+            })
+    })
+
+
+    //for university details
+    app.post('/addUniversityDetails', (req, res) => {
+        const data = req.body;
+        universityDetailsCollection.insertOne({ data })
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+    app.get('/universitiesDetails', (req, res) => {
+        universityDetailsCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
+    app.get('/universityDetail/:id', (req, res) => {
+        universityDetailsCollection.find({ _id: ObjectId(req.params.id) })
+            .toArray((err, documents) => {
+                res.send(documents[0]);
+            })
+    })
+    app.delete('/deleteUniversityDetail/:id', (req, res) => {
+        universityDetailsCollection.deleteOne({ _id: ObjectId(req.params.id) })
+            .then((result) => {
+                res.send(result.deletedCount > 0);
+            })
+    })
+    app.patch('/updateUniversityDetail/:id', (req, res) => {
+        universityDetailsCollection.updateOne({ _id: ObjectId(req.params.id) },
             {
                 $set: {
                     data: req.body
