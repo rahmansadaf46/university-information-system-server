@@ -30,6 +30,7 @@ client.connect(err => {
     const appointmentCollection = client.db(`${process.env.DB_FILE}`).collection("allAppointment");
     const universityCollection = client.db(`${process.env.DB_FILE}`).collection("allUniversity");
     const universityDetailsCollection = client.db(`${process.env.DB_FILE}`).collection("allUniversityDetails");
+    const admissionDetailsCollection = client.db(`${process.env.DB_FILE}`).collection("allAdmissionDetails");
     //for order
     app.post('/addOrder', (req, res) => {
         const order = req.body;
@@ -189,6 +190,46 @@ client.connect(err => {
     })
     app.patch('/updateUniversityDetail/:id', (req, res) => {
         universityDetailsCollection.updateOne({ _id: ObjectId(req.params.id) },
+            {
+                $set: {
+                    data: req.body
+                },
+            })
+            .then(result => {
+                res.send(result.matchedCount > 0);
+            })
+    })
+
+
+
+      //for admission details
+    app.post('/addAdmissionDetails', (req, res) => {
+        const data = req.body;
+        admissionDetailsCollection.insertOne({ data })
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+    app.get('/admissionDetails', (req, res) => {
+        admissionDetailsCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
+    app.get('/admissionDetail/:id', (req, res) => {
+        admissionDetailsCollection.find({ _id: ObjectId(req.params.id) })
+            .toArray((err, documents) => {
+                res.send(documents[0]);
+            })
+    })
+    app.delete('/deleteAdmission/:id', (req, res) => {
+        admissionDetailsCollection.deleteOne({ _id: ObjectId(req.params.id) })
+            .then((result) => {
+                res.send(result.deletedCount > 0);
+            })
+    })
+    app.patch('/updateAdmissionDetail/:id', (req, res) => {
+        admissionDetailsCollection.updateOne({ _id: ObjectId(req.params.id) },
             {
                 $set: {
                     data: req.body
